@@ -1,0 +1,46 @@
+version: '3'
+services:
+  my-service1:
+    image: my-service1-image
+    ports:
+      - "8083:8080"
+    networks:
+      - my_network
+
+  my-service2:
+    image: my-service2-image
+    ports:
+      - "8082:8080"
+    networks:
+      - my_network
+    environment:
+      - ENV_VARIABLE=value
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test@1234
+      POSTGRES_DB: Docker
+    volumes:
+      - my_volume_name:/var/lib/postgresql/data
+    networks:
+      - my_network
+
+  nginx:
+    image: my-nginx-image
+    ports:
+      - "80:80"
+    networks:
+      - my_network
+
+volumes:
+  my_volume_name:
+
+networks:
+  my_network:
