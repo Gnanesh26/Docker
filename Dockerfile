@@ -1,5 +1,5 @@
 # Use official OpenJDK 17 image as the base image
-FROM openjdk:17-jdk-slim
+FROM maven:3.8.3-openjdk-17 AS build
 
 
 # Set the working directory inside the container

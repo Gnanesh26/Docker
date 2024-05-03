@@ -1,28 +1,33 @@
-version: '3'
+version: '3.8'
 services:
-  my-service1:
-    image: my-service1-image
-    ports:
-      - "8083:8080"
-    networks:
-      - my_network
-
   my-service2:
     image: my-service2-image
+    container_name: my-service2
+    build: ../docker
     ports:
       - "8082:8080"
+    environment:
+      SPRING_APPLICATION_NAME: docker
+      SPRING_JPA_HIBERNATE_SHOW-SQL: true
+      SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: test@1234
+      SPRING_LIQUIBASE_ENABLED: true
+      SPRING_JPA_HIBERNATE_DDL-AUTO: update
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Docker?createDatabaseIfNotExist=true
     networks:
       - my_network
-    environment:
-      - ENV_VARIABLE=value
+    depends_on:
+      - postgres
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: [ "CMD", "curl", "-f", "http://my-service2:8080/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
 
   postgres:
     image: postgres
+    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test@1234
@@ -31,6 +36,8 @@ services:
       - my_volume_name:/var/lib/postgresql/data
     networks:
       - my_network
+    ports:
+      - "5432:5432"
 
   nginx:
     image: my-nginx-image
@@ -41,6 +48,9 @@ services:
 
 volumes:
   my_volume_name:
+    driver: local
 
 networks:
   my_network:
+    driver: bridge
+
