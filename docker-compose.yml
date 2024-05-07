@@ -1,12 +1,20 @@
-version: '3.8'
+ version: '3.8'
+
 services:
+  # Service for your Spring Boot application
   my-service2:
-    image: my-service2-image
-    container_name: my-service2
-    build: ../docker
+    image: my-service2-image  # Use the specified Docker image for this service
+
+    #A Docker image is a lightweight, standalone, and executable software package that contains everything needed to run a piece of software,
+    #including the code, runtime, libraries, environment variables, and configuration files.
+
+    #A Docker container is a runtime instance of a Docker image.
+
+    container_name: my-service2  # Specify the name for the container
+    build: ../docker  # Build context for the Dockerfile, assuming it's located in a directory named 'docker' one level up
     ports:
-      - "8082:8080"
-    environment:
+      - "8090:8080"  # Map port 8080 of the container to port 8082 of the host
+    environment:  # Set environment variables for the Spring Boot application
       SPRING_APPLICATION_NAME: docker
       SPRING_JPA_HIBERNATE_SHOW-SQL: true
       SPRING_JPA_DATABASE-PLATFORM: org.hibernate.dialect.PostgreSQLDialect
@@ -16,41 +24,42 @@ services:
       SPRING_JPA_HIBERNATE_DDL-AUTO: update
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/Docker?createDatabaseIfNotExist=true
     networks:
-      - my_network
+      - my_network  # Attach the container to the 'my_network' network
     depends_on:
-      - postgres
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://my-service2:8080/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      - postgres  # Specify that this service depends on the 'postgres' service
+#    healthcheck:
+#      test: [ "CMD", "curl", "-f", "http://my-service2:8080/health" ]  # Health check command
+#      interval: 30s  # Check the health of the container every 30 seconds
+#      timeout: 10s  # Timeout for the health check
+#      retries: 3  # Number of retries for the health check
 
+  # PostgreSQL database service
   postgres:
-    image: postgres
-    container_name: postgres
-    environment:
+    image: postgres  # Use the official PostgreSQL Docker image
+    container_name: postgres  # Specify the name for the container
+    environment:  # Set environment variables for the PostgreSQL container
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: test@1234
       POSTGRES_DB: Docker
     volumes:
-      - my_volume_name:/var/lib/postgresql/data
+      - my_volume_name:/var/lib/postgresql/data  # Mount a volume for persistent storage of PostgreSQL data
     networks:
-      - my_network
+      - my_network  # Attach the container to the 'my_network' network
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Map port 5432 of the container to port 5432 of the host
 
+  # Nginx service
   nginx:
-    image: my-nginx-image
+    image: my-nginx-image  # Use the specified Docker image for the Nginx service
     ports:
-      - "80:80"
+      - "80:80"  # Map port 80 of the container to port 80 of the host
     networks:
-      - my_network
+      - my_network  # Attach the container to the 'my_network' network
 
 volumes:
-  my_volume_name:
-    driver: local
+  my_volume_name:  # Define a named volume for persistent storage
+    driver: local  # Use the local volume driver
 
 networks:
-  my_network:
-    driver: bridge
-
+  my_network:  # Define a custom bridge network
+    driver: bridge  # Use the bridge network driver
